@@ -7,7 +7,7 @@ Install requirements (python >= 3.6):
 `pip install -r requirements.txt`
 
 # Step 2:
-Download the network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/eye_discrete_model_and_weights.h5).
+Download the latest network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/eye_discrete_model_and_weights.h5).
 
 # Step 3:
 Run the example file with the webcam:
