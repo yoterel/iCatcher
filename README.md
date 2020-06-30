@@ -1,5 +1,7 @@
 # Baby-Eye-Tracker
 A CNN that classifies discrete eye gaze direction ("Left", "Right", "Away") from children videos.
+Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos Using Neural Networks" presented in [ICIS 2020](https://infantstudies.org/congress-2020).
+
 
 # Step 1:
 Install requirements (python >= 3.6):
