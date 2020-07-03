@@ -21,12 +21,14 @@ Download the face extraction model files (opencv dnn):
 Put files in the same directory as "example.py".
 
 # Step 3:
-Run the example file with the webcam (id for default webcam is usually 0):
+To run the example file with the webcam (id for default webcam is usually 0):
 
 `python example.py --source_type webcam my_webcam_id`
 
-Run the example file with a video file:
+To run the example file with a video file:
 
 `python example.py --source_type file /path/to/my/video.mp4`
 
 An example video file can be found [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/example.mp4).
+
+Feel free to contribute code.
