@@ -13,6 +13,7 @@ Download the latest network model & weights file [here](https://www.cs.tau.ac.il
 This is a keras model h5 file which contains both the architecture and the weights.
 
 Download the face extraction model files (opencv dnn):
+
 [prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
 
 [caffemodel (contains weights)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/face_model.caffemodel)
