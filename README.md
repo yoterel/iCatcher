@@ -9,7 +9,14 @@ Install requirements (python >= 3.6):
 `pip install -r requirements.txt`
 
 # Step 2:
-Download the latest network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/eye_discrete_model_and_weights.h5).
+Download the latest network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5).
+This is a keras model h5 file which contains both the architecture and the weights.
+
+Download the face extraction model files (opencv dnn):
+[prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
+[caffemodel (contains weights)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/face_model.caffemodel)
+
+Put files in the same directory as "example.py".
 
 # Step 3:
 Run the example file with the webcam:

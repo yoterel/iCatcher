@@ -2,16 +2,6 @@ import argparse
 import cv2
 from pathlib import Path
 import numpy as np
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '4'
-from keras.backend.tensorflow_backend import set_session
-import tensorflow as tf
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-# config.log_device_placement = True  # to log device placement (on which device the operation ran)
-sess = tf.Session(config=config)
-set_session(sess)  # set this TensorFlow session as the default session for Keras
-import keras
 
 
 def put_text(img, class_name):
@@ -49,7 +39,8 @@ def detectFaceOpenCVDnn(net, frame, conf_threshold):
     return bboxes
 
 
-def predict(vid_path):
+def predict(opt):
+    import keras
     face_model_file = Path("face_model.caffemodel")
     config_file = Path("config.prototxt")
     path_to_primary_model = Path("model.h5")
@@ -58,55 +49,75 @@ def predict(vid_path):
     sequence_length = 9
     loc = -5
     face_model = cv2.dnn.readNetFromCaffe(str(config_file), str(face_model_file))
-    primary_eye_model = keras.models.load_model(str(path_to_primary_model))
-    print("predicting on:", vid_path)
+    primary_model = keras.models.load_model(str(path_to_primary_model))
+
     answers = []
     image_sequence = []
     frames = []
-    cap = cv2.VideoCapture(str(vid_path))
+    frame_count = 0
+    if opt.source_type == 'file':
+        video_file = Path(opt.video_file)
+        print("predicting on file:", video_file)
+        cap = cv2.VideoCapture(str(video_file))
+    else:
+        print("predicting on webcam:", opt.source)
+        cap = cv2.VideoCapture(int(opt.source))
     ret_val, frame = cap.read()
     while ret_val:
         frames.append(frame)
         bbox = detectFaceOpenCVDnn(face_model, frame, 0.7)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # DO THIS or else degraded performance.
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # network was trained on RGB images.
         if not bbox:
-            answers.append(classes['away'])  # if face detector fails, treat as away
+            answers.append(classes['away'])  # if face detector fails, treat as away and mark invalid
             image = np.zeros((1, 75, 75, 3), np.float64)
             image_sequence.append((image, True))
         else:
-            face = min(bbox, key=lambda x: x[3] - x[1])  # select lowest face, probably belongs to kid
+            face = min(bbox, key=lambda x: x[3] - x[1])  # select lowest face in image, probably belongs to kid
             crop_img = frame[face[1]:face[1] + face[3], face[0]:face[0] + face[2]]
             if crop_img.size == 0:
-                answers.append(classes['away'])  # if face detector fails, treat as away
+                answers.append(classes['away'])  # if face detector fails, treat as away and mark invalid
                 image = np.zeros((1, 75, 75, 3), np.float64)
                 image_sequence.append((image, True))
             else:
-                answers.append(classes['left'])  # if face detector succeeds, treat as left
+                answers.append(classes['left'])  # if face detector succeeds, treat as left and mark valid
                 image = cv2.resize(crop_img, (75, 75)) * 1. / 255
                 image = np.expand_dims(image, axis=0)
                 image_sequence.append((image, False))
         if len(image_sequence) == sequence_length:
-            if not image_sequence[sequence_length // 2][1]:  # if middle image is not blacked
+            if not image_sequence[sequence_length // 2][1]:  # if middle image is valid
                 to_predict = [x[0] for x in image_sequence[0::2]]
-                prediction = primary_eye_model.predict(to_predict)
+                prediction = primary_model.predict(to_predict)
                 predicted_classes = np.argmax(prediction, axis=1)
                 answers[loc] = np.int16(predicted_classes[0]).item()
             image_sequence.pop(0)
             popped_frame = frames.pop(0)
             class_text = reverse_dict[answers[-sequence_length]]
-            popped_frame = put_text(popped_frame, class_text)
-            cv2.imshow('image', popped_frame)
-            print(class_text)
-            cv2.waitKey(0)
+            # popped_frame = put_text(popped_frame, class_text)
+            print("frame: {} class: {}", frame_count, class_text)
         ret_val, frame = cap.read()
+        frame_count += 1
+
+
+def configure_environment(gpu_id):
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id
+    from keras.backend.tensorflow_backend import set_session
+    import tensorflow as tf
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+    # config.log_device_placement = True  # to log device placement (on which device the operation ran)
+    sess = tf.Session(config=config)
+    set_session(sess)  # set this TensorFlow session as the default session for Keras
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu_id', type=str, default='-1', help='gpu id to use, use -1 for CPU')
-    parser.add_argument('--video-file', help='path to video file to process')
-    parser.add_argument('--webcam-id', type=int, default=0, help='webcam id to use as input source')
-    parser.add_argument('--output-path', help='if present, results will be dumped to this file')
+    parser.add_argument('source_type', type=str, default='file', choices=['file', 'webcam'],
+                        help='selects source of stream to use.')
+    parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id)')
+    parser.add_argument('--output_path', help='if present, results will be dumped to this file')
     opt = parser.parse_args()
-    video_file = Path('example.mp4')
-    predict(video_file)
+    configure_environment(opt.gpu_id)
+    predict(opt)
