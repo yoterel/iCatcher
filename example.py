@@ -6,22 +6,21 @@ import numpy as np
 
 def put_text(img, class_name):
     font = cv2.FONT_HERSHEY_SIMPLEX
-    bottomLeftCornerOfText = (10, 500)
-    fontScale = 1
-    fontColor = (255, 255, 255)
-    lineType = 2
+    bottom_left_corner_text = (10, 500)
+    font_scale = 1
+    font_color = (255, 255, 255)
+    line_type = 2
 
     cv2.putText(img, class_name,
-                bottomLeftCornerOfText,
+                bottom_left_corner_text,
                 font,
-                fontScale,
-                fontColor,
-                lineType)
+                font_scale,
+                font_color,
+                line_type)
     return img
 
 
-def detectFaceOpenCVDnn(net, frame, conf_threshold):
-    # frameOpencvDnn = frame.copy()
+def detect_face_opencv_dnn(net, frame, conf_threshold):
     frameHeight = frame.shape[0]
     frameWidth = frame.shape[1]
     blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), [104, 117, 123], False, False)
@@ -50,13 +49,12 @@ def predict(opt):
     loc = -5
     face_model = cv2.dnn.readNetFromCaffe(str(config_file), str(face_model_file))
     primary_model = keras.models.load_model(str(path_to_primary_model))
-
     answers = []
     image_sequence = []
     frames = []
     frame_count = 0
     if opt.source_type == 'file':
-        video_file = Path(opt.video_file)
+        video_file = Path(opt.source)
         print("predicting on file:", video_file)
         cap = cv2.VideoCapture(str(video_file))
     else:
@@ -65,7 +63,7 @@ def predict(opt):
     ret_val, frame = cap.read()
     while ret_val:
         frames.append(frame)
-        bbox = detectFaceOpenCVDnn(face_model, frame, 0.7)
+        bbox = detect_face_opencv_dnn(face_model, frame, 0.7)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # network was trained on RGB images.
         if not bbox:
             answers.append(classes['away'])  # if face detector fails, treat as away and mark invalid
@@ -92,8 +90,10 @@ def predict(opt):
             image_sequence.pop(0)
             popped_frame = frames.pop(0)
             class_text = reverse_dict[answers[-sequence_length]]
-            # popped_frame = put_text(popped_frame, class_text)
-            print("frame: {} class: {}", frame_count, class_text)
+            if opt.show_result:
+                popped_frame = put_text(popped_frame, class_text)
+                cv2.imshow("frame", popped_frame)
+            print("frame: {}, class: {}".format(str(frame_count-sequence_length+1), class_text))
         ret_val, frame = cap.read()
         frame_count += 1
 
@@ -101,23 +101,22 @@ def predict(opt):
 def configure_environment(gpu_id):
     import os
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id
+    os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id  # set gpu visibility prior to importing tf and keras
     from keras.backend.tensorflow_backend import set_session
     import tensorflow as tf
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-    # config.log_device_placement = True  # to log device placement (on which device the operation ran)
     sess = tf.Session(config=config)
     set_session(sess)  # set this TensorFlow session as the default session for Keras
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu_id', type=str, default='-1', help='gpu id to use, use -1 for CPU')
-    parser.add_argument('source_type', type=str, default='file', choices=['file', 'webcam'],
+    parser.add_argument('--gpu_id', type=str, default='-1', help='GPU id to use, use -1 for CPU.')
+    parser.add_argument('--source_type', type=str, default='file', choices=['file', 'webcam'],
                         help='selects source of stream to use.')
-    parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id)')
-    parser.add_argument('--output_path', help='if present, results will be dumped to this file')
+    parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id).')
+    parser.add_argument('--show_result', help='frames and class will be displayed on screen.')
     opt = parser.parse_args()
     configure_environment(opt.gpu_id)
     predict(opt)
