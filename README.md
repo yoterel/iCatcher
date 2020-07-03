@@ -14,6 +14,7 @@ This is a keras model h5 file which contains both the architecture and the weigh
 
 Download the face extraction model files (opencv dnn):
 [prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
+
 [caffemodel (contains weights)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/face_model.caffemodel)
 
 Put files in the same directory as "example.py".
