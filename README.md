@@ -2,7 +2,7 @@
 A CNN that classifies discrete eye gaze direction ("Left", "Right", "Away") from children videos.
 Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos Using Neural Networks" presented in [ICIS 2020](https://infantstudies.org/congress-2020).
 
-Note: A 2-class model ("Left", "Right") will also be availble soon.
+Note: A 2-class model ("Left", "Right") will also be available soon.
 
 # Step 1:
 Install requirements (python >= 3.6):
