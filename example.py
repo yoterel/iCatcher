@@ -47,6 +47,10 @@ def predict(opt):
     reverse_dict = {0: 'away', 1: 'left', 2: 'right'}
     sequence_length = 9
     loc = -5
+    dataset_mean = opt.per_channel_mean if opt.per_channel_mean else [0.41304266, 0.34594961, 0.27693587]
+    print("using the following values for per-channel mean:", dataset_mean)
+    dataset_std = opt.per_channel_std if opt.per_channel_std else [0.28606387, 0.2466201, 0.20393684]
+    print("using the following values for per-channel std:", dataset_mean)
     face_model = cv2.dnn.readNetFromCaffe(str(config_file), str(face_model_file))
     primary_model = keras.models.load_model(str(path_to_primary_model))
     answers = []
@@ -80,6 +84,8 @@ def predict(opt):
                 answers.append(classes['left'])  # if face detector succeeds, treat as left and mark valid
                 image = cv2.resize(crop_img, (75, 75)) * 1. / 255
                 image = np.expand_dims(image, axis=0)
+                image -= np.array(dataset_mean)
+                image /= (np.array(dataset_std) + 1e-6)
                 image_sequence.append((image, False))
         if len(image_sequence) == sequence_length:
             if not image_sequence[sequence_length // 2][1]:  # if middle image is valid
@@ -117,6 +123,10 @@ if __name__ == '__main__':
                         help='selects source of stream to use.')
     parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id).')
     parser.add_argument('--show_result', help='frames and class will be displayed on screen.')
+    parser.add_argument('--per_channel_mean', nargs=3, metavar=('Channel1_mean', 'Channel2_mean', 'Channel3_mean'),
+                        type=float, help='supply custom per-channel mean of data for normalization')
+    parser.add_argument('--per_channel_std', nargs=3, metavar=('Channel1_std', 'Channel2_std', 'Channel3_std'),
+                        type=float, help='supply custom per-channel std of data for normalization')
     opt = parser.parse_args()
     configure_environment(opt.gpu_id)
     predict(opt)
