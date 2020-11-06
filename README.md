@@ -50,7 +50,7 @@ From the activated virtual environment, run
 
 If you see an error like the following on MacOS:
 
-````
+```
 ERROR: Could not find a version that satisfies the requirement pkg-resources==0.0.0 (from -r requirements.txt (line 14)) (from versions: none)
 ERROR: No matching distribution found for pkg-resources==0.0.0 (from -r requirements.txt (line 14))
 ```
