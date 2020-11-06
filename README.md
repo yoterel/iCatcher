@@ -2,12 +2,67 @@
 A CNN that classifies discrete eye gaze direction ("Left", "Right", "Away") from low-res in-the-wild infant videos (per-frame classification).
 Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos Using Neural Networks" presented in [ICIS 2020](https://infantstudies.org/congress-2020).
 
-# Step 1:
-Install requirements (python >= 3.6):
+
+# Step 1: Clone this repository to get a copy of the code to run locally.
+
+`git clone https://github.com/yoterel/Baby-Eye-Tracker`
+
+# Step 2: Navigate to the Baby-Eye-Tracker directory, then create a virtual environment.
+
+## Windows and Linux
+
+Create the virtual environment:
+
+`python3 -m venv env` (Linux and Mac) 
+
+`py -m venv env` (Windows)
+
+See https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
+
+Make sure it is using Python 3.6+ (by default it will use the most recent version available, but you can specify). 
+If you don't have an appropriate version of python installed, you can install it at https://www.python.org/downloads/
+
+You will need to make sure you have 64-bit python installed in order to use tensorflow-gpu (see https://github.com/tensorflow/tensorflow/issues/8251)
+
+Activate the environment:
+
+`source venv/bin/activate`
+
+## MacOS using Anaconda
+
+In principle you should just be able to create the virtual environment with python3 as on Linux. But installing the requirements is more straightforward using Anaconda:
+
+[Install Anaconda](https://www.anaconda.com/products/individual/get-started) if needed, then create a virtual environment using conda, including pip (see [this article]( https://datumorphism.com/til/programming/python/python-anaconda-install-requirements/):
+
+`conda create -n env python=3.8 anaconda pip`
+
+Activate the environment
+
+`conda activate env`
+
+# Step 3: Install the requirements
+
+From the activated virtual environment, run
+
+## Regular Python environment:
 
 `pip install -r requirements.txt`
 
-# Step 2:
+If you see an error like the following on MacOS:
+
+````
+ERROR: Could not find a version that satisfies the requirement pkg-resources==0.0.0 (from -r requirements.txt (line 14)) (from versions: none)
+ERROR: No matching distribution found for pkg-resources==0.0.0 (from -r requirements.txt (line 14))
+```
+
+you can safely remove the line `pkg-resources==0.0.0` from requirements.txt and try again. pkg-resources is already included in setuptools. 
+
+## Conda environment
+
+`pip install -r requirements_mac.txt`
+
+# Step 4:
+
 Download the latest network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5).
 This is a keras model h5 file which contains both the architecture and the weights.
 
@@ -19,7 +74,8 @@ Download the face extraction model files (opencv dnn):
 
 Put files in the same directory as "example.py".
 
-# Step 3:
+# Step 5:
+
 To run the example file with the webcam (id for default webcam is usually 0):
 
 `python example.py --source_type webcam my_webcam_id`
