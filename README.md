@@ -63,14 +63,14 @@ you can safely remove the line `pkg-resources==0.0.0` from requirements.txt and 
 
 # Step 4:
 
-Download the latest network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5).
+- Download the latest network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5).
 This is a keras model h5 file which contains both the architecture and the weights.
 
-Download the face extraction model files (opencv dnn):
+- Download the face extraction model files (opencv dnn):
 
-[prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
+  [prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
 
-[caffemodel (contains weights)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/face_model.caffemodel)
+  [caffemodel (contains weights)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/face_model.caffemodel)
 
 Put files in the same directory as "example.py".
 
@@ -83,6 +83,13 @@ To run the example file with the webcam (id for default webcam is usually 0):
 To run the example file with a video file:
 
 `python example.py --source_type file /path/to/my/video.mp4`
+
+To display an annotated video during processing, showing the face bounding box and label,
+add `--show_result`. You can also save this video using `--save_annotated_video`.
+
+This will save a file in the format described [here](https://osf.io/3n97m/) describing the 
+output of the automated coding. You can specify the location of this file using `--output_path <output path>`
+and the location of the annotated video (if saving) using `--output_video_path <video path>`.
 
 An example video file can be found [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/example.mp4).
 
