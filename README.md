@@ -59,7 +59,7 @@ you can safely remove the line `pkg-resources==0.0.0` from requirements.txt and 
 
 ## Conda environment
 
-`pip install -r requirements_mac.txt`
+`pip install -r requirements_conda.txt`
 
 # Step 4:
 
@@ -83,6 +83,8 @@ To run the example file with the webcam (id for default webcam is usually 0):
 To run the example file with a video file:
 
 `python example.py --source_type file /path/to/my/video.mp4`
+
+If you're using Tensorflow 2.x (e.g. due to using Anaconda above), add the flag `--use_tensorflow_2`.
 
 To display an annotated video during processing, showing the face bounding box and label,
 add `--show_result`. You can also save this video using `--save_annotated_video`.

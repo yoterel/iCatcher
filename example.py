@@ -39,7 +39,6 @@ def detect_face_opencv_dnn(net, frame, conf_threshold):
 
 
 def predict(opt):
-    from tensorflow import keras # for compatibility with tensorflow 2.x - see https://github.com/keras-team/keras/releases
     face_model_file = Path("face_model.caffemodel")
     config_file = Path("config.prototxt")
     path_to_primary_model = Path("model.h5")
@@ -166,13 +165,20 @@ def predict(opt):
     cv2.destroyAllWindows()
 
 
-def configure_environment(gpu_id):
+def configure_environment(gpu_id, use_tensorflow_2):
     import os
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id  # set gpu visibility prior to importing tf and keras
     from keras.backend.tensorflow_backend import set_session
-    import tensorflow.compat.v1 as tf
-    tf.disable_v2_behavior() 
+    
+    if use_tensorflow_2:
+        import tensorflow.compat.v1 as tf
+        tf.disable_v2_behavior() 
+        from tensorflow import keras # for compatibility with tensorflow 2.x - see https://github.com/keras-team/keras/releases
+    else:
+        import keras
+        import tensorflow as tf
+
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
     sess = tf.Session(config=config)
@@ -186,13 +192,14 @@ if __name__ == '__main__':
                         help='selects source of stream to use.')
     parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id).')
     parser.add_argument('--output_path', help='filename for text output')
-    parser.add_argument('--show_result', help='frames and class will be displayed on screen.', action ='store_true', default=True)
+    parser.add_argument('--show_result', help='frames and class will be displayed on screen.', action ='store_true')
     parser.add_argument('--save_annotated_video', help='video with class annotations will be saved', action ='store_true')
     parser.add_argument('--output_video_path', help='filename for annotated video output')
     parser.add_argument('--per_channel_mean', nargs=3, metavar=('Channel1_mean', 'Channel2_mean', 'Channel3_mean'),
                         type=float, help='supply custom per-channel mean of data for normalization')
     parser.add_argument('--per_channel_std', nargs=3, metavar=('Channel1_std', 'Channel2_std', 'Channel3_std'),
                         type=float, help='supply custom per-channel std of data for normalization')
+    parser.add_argument('--use_tensorflow_2', action='store_true', help='Use Tensorflow 2.x, e.g. via Anaconda')
     opt = parser.parse_args()
-    configure_environment(opt.gpu_id)
+    configure_environment(opt.gpu_id, opt.use_tensorflow_2)
     predict(opt)
