@@ -20,6 +20,29 @@ def put_text(img, class_name):
     return img
 
 
+def put_arrow(img, class_name, face):
+    arrow_start_x = int(face[0] + 0.5 * face[2])
+    arrow_end_x = int(face[0] + 0.1 * face[2] if class_name == "left" else face[0] + 0.9 * face[2])
+    arrow_y = int(face[1] + 0.8 * face[3])
+    img = cv2.arrowedLine(img,
+                          (arrow_start_x, arrow_y),
+                          (arrow_end_x, arrow_y),
+                          (0, 255, 0),
+                          thickness=3,
+                          tipLength=0.4)
+    return img
+
+
+def put_rectangle(popped_frame, face):
+    color = (0, 255, 0)  # green
+    thickness = 2
+    popped_frame = cv2.rectangle(popped_frame,
+                                 (face[0], face[1]), (face[0] + face[2], face[1] + face[3]),
+                                 color,
+                                 thickness)
+    return popped_frame
+
+
 def detect_face_opencv_dnn(net, frame, conf_threshold):
     frameHeight = frame.shape[0]
     frameWidth = frame.shape[1]
@@ -39,6 +62,7 @@ def detect_face_opencv_dnn(net, frame, conf_threshold):
 
 
 def predict(opt):
+    # initialize
     face_model_file = Path("face_model.caffemodel")
     config_file = Path("config.prototxt")
     path_to_primary_model = Path("model.h5")
@@ -46,16 +70,19 @@ def predict(opt):
     reverse_dict = {0: 'away', 1: 'left', 2: 'right'}
     sequence_length = 9
     loc = -5
-    dataset_mean = opt.per_channel_mean if opt.per_channel_mean else [0.41304266, 0.34594961, 0.27693587]
-    print("using the following values for per-channel mean:", dataset_mean)
-    dataset_std = opt.per_channel_std if opt.per_channel_std else [0.28606387, 0.2466201, 0.20393684]
-    print("using the following values for per-channel std:", dataset_mean)
-    face_model = cv2.dnn.readNetFromCaffe(str(config_file), str(face_model_file))
-    primary_model = keras.models.load_model(str(path_to_primary_model))
     answers = []
     image_sequence = []
     frames = []
     frame_count = 0
+    last_class_text = ""  # Initialize so that we see the first class assignment as an event to record
+    dataset_mean = opt.per_channel_mean if opt.per_channel_mean else [0.41304266, 0.34594961, 0.27693587]
+    print("using the following values for per-channel mean:", dataset_mean)
+    dataset_std = opt.per_channel_std if opt.per_channel_std else [0.28606387, 0.2466201, 0.20393684]
+    print("using the following values for per-channel std:", dataset_mean)
+    # load deep models
+    face_model = cv2.dnn.readNetFromCaffe(str(config_file), str(face_model_file))
+    primary_model = tf.keras.models.load_model(str(path_to_primary_model))
+    # set video source
     if opt.source_type == 'file':
         video_file = Path(opt.source)
         print("predicting on file:", video_file)
@@ -63,40 +90,23 @@ def predict(opt):
     else:
         print("predicting on webcam:", opt.source)
         cap = cv2.VideoCapture(int(opt.source))
-        
-    # Get the first frame
-    ret_val, frame = cap.read()
-    last_class_text = "" # Initialize so that we see the first class assignment as an event to record
-    
     # Get some basic info about the video
-    width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     resolution = (int(width), int(height))
     framerate = int(cap.get(cv2.CAP_PROP_FPS))
-    
-    # If creating annotated video output, set up now!
-    if opt.save_annotated_video:
-        if opt.output_video_path:
-            video_output_filepath = Path(opt.output_video_path)
-        else:
-            # Default output filename: same as input with "_babyeyetracker" appended,
-            # in same directory
-            if opt.source_type == "file":
-                video_output_filepath = Path(video_file.parent, video_file.stem + "_babyeyetracker.mp4")          
-            else:
-                video_output_filepath = Path(f"webcam_{opt.source}.mp4")
-            fourcc = cv2.VideoWriter_fourcc(*"MP4V") # may need to be adjusted per available codecs & OS
-            video_output = cv2.VideoWriter(str(video_output_filepath.resolve()), fourcc, framerate, resolution, True)       
-    
-    # Set up text output file, using https://osf.io/3n97m/ - PrefLookTimestamp coding standard
-    if opt.output_path:
-        output_filepath = Path(opt.output_path)
-    else:
-        output_filepath = Path(video_file.parent, video_file.stem + "_babyeyetracker.csv") if opt.source_type == "file" else Path(f"webcam_{opt.source}.csv")
-    output_file = open(output_filepath, "w", newline="")
-    # Write header
-    output_file.write("Tracks: left, right, away, codingactive, outofframe\nTime,Duration,TrackName,comment\n\n")
+    # If creating annotated video output, set up now
+    if opt.output_video_path:
+        fourcc = cv2.VideoWriter_fourcc(*"MP4V")  # may need to be adjusted per available codecs & OS
+        video_output = cv2.VideoWriter(str(opt.output_video_path.resolve()), fourcc, framerate, resolution, True)
+    if opt.output_annotation:
+        output_file = open(opt.output_annotation, "w", newline="")
+        if opt.output_format == "PrefLookTimestamp":
+            # Write header
+            output_file.write("Tracks: left, right, away, codingactive, outofframe\nTime,Duration,TrackName,comment\n\n")
 
+    # iterate over frames
+    ret_val, frame = cap.read()
     while ret_val:
         frames.append(frame)
         bbox = detect_face_opencv_dnn(face_model, frame, 0.7)
@@ -128,78 +138,67 @@ def predict(opt):
             image_sequence.pop(0)
             popped_frame = frames.pop(0)
             class_text = reverse_dict[answers[-sequence_length]]
-            # If showing result, add text label, bounding box for face, and arrow showing
-            # direction
-            if opt.show_result or opt.save_annotated_video:
+            # If save_annotated_video is true, add text label, bounding box for face, and arrow showing direction
+            if opt.output_video_path:
                 popped_frame = put_text(popped_frame, class_text)
                 if bbox:
-                    color = (0, 255, 0) # green
-                    thickness = 2
-                    popped_frame = cv2.rectangle(popped_frame, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), color, thickness)
+                    popped_frame = put_rectangle(popped_frame, face)
                     if not class_text == "away":
-                        arrow_start_x = int(face[0] + 0.5 * face[2])
-                        arrow_end_x = int(face[0] + 0.1 * face[2] if class_text == "left" else face[0] + 0.9 * face[2])
-                        arrow_y = int(face[1] + 0.8 * face[3])
-                        popped_frame = cv2.arrowedLine(popped_frame, (arrow_start_x, arrow_y), (arrow_end_x, arrow_y), (0, 255, 0), thickness=3, tipLength=0.4)
-                cv2.imshow("frame", popped_frame)
-                cv2.waitKey(1) # Make sure display is updated
-                if opt.save_annotated_video:
-                    video_output.write(popped_frame)
+                        popped_frame = put_arrow(popped_frame, class_text, face)
+                video_output.write(popped_frame)
                 # Record "event" for change of direction if code has changed
-                if class_text != last_class_text:
-                    frame_ms = int(1000./framerate * frame_count)
-                    output_file.write(f"{frame_ms},0,{class_text}\n")
-                    last_class_text = class_text
+            if opt.output_annotation:
+                if opt.output_format == "PrefLookTimestamp":
+                    if class_text != last_class_text:
+                        frame_ms = int(1000./framerate * frame_count)
+                        output_file.write("{},0,{}\n".format(frame_ms, class_text))
+                        last_class_text = class_text
             print("frame: {}, class: {}".format(str(frame_count-sequence_length+1), class_text))
         ret_val, frame = cap.read()
         frame_count += 1
         
-    if opt.save_annotated_video:
+    if opt.output_video_path:
         video_output.release()
-        
-    frame_ms = int(1000./framerate * frame_count)
-    output_file.write(f"0,{frame_ms},codingactive\n")
-    output_file.close()
-    
+    if opt.output_annotation:  # write footer to file
+        if opt.output_format == "PrefLookTimestamp":
+            frame_ms = int(1000./framerate * frame_count)
+            output_file.write("0,{},codingactive\n".format(frame_ms))
+            output_file.close()
     cap.release()
-    cv2.destroyAllWindows()
 
 
-def configure_environment(gpu_id, use_tensorflow_2):
+def configure_environment(gpu_id):
     import os
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id  # set gpu visibility prior to importing tf and keras
-    from keras.backend.tensorflow_backend import set_session
-    
-    if use_tensorflow_2:
-        import tensorflow.compat.v1 as tf
-        tf.disable_v2_behavior() 
-        from tensorflow import keras # for compatibility with tensorflow 2.x - see https://github.com/keras-team/keras/releases
-    else:
-        import keras
-        import tensorflow as tf
-
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-    sess = tf.Session(config=config)
-    set_session(sess)  # set this TensorFlow session as the default session for Keras
+    global tf
+    import tensorflow as tf
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Baby Eye Tracker')
     parser.add_argument('--gpu_id', type=str, default='-1', help='GPU id to use, use -1 for CPU.')
     parser.add_argument('--source_type', type=str, default='file', choices=['file', 'webcam'],
                         help='selects source of stream to use.')
     parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id).')
-    parser.add_argument('--output_path', help='filename for text output')
-    parser.add_argument('--show_result', help='frames and class will be displayed on screen.', action ='store_true')
-    parser.add_argument('--save_annotated_video', help='video with class annotations will be saved', action ='store_true')
-    parser.add_argument('--output_video_path', help='filename for annotated video output')
+    parser.add_argument('--output_annotation', type=str, help='filename for text output')
+    # Set up text output file, using https://osf.io/3n97m/ - PrefLookTimestamp coding standard
+    parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp"])
+    parser.add_argument('--output_video_path', help='if present, annotated video will be saved to this path')
     parser.add_argument('--per_channel_mean', nargs=3, metavar=('Channel1_mean', 'Channel2_mean', 'Channel3_mean'),
                         type=float, help='supply custom per-channel mean of data for normalization')
     parser.add_argument('--per_channel_std', nargs=3, metavar=('Channel1_std', 'Channel2_std', 'Channel3_std'),
                         type=float, help='supply custom per-channel std of data for normalization')
-    parser.add_argument('--use_tensorflow_2', action='store_true', help='Use Tensorflow 2.x, e.g. via Anaconda')
-    opt = parser.parse_args()
-    configure_environment(opt.gpu_id, opt.use_tensorflow_2)
-    predict(opt)
+    args = parser.parse_args()
+
+    if args.output_annotation:
+        args.output_filepath = Path(args.output_annotation)
+    if args.output_video_path:
+        args.output_video_path = Path(args.output_video_path)
+    return args
+
+
+if __name__ == '__main__':
+    args = parse_arguments()
+    configure_environment(args.gpu_id)
+    predict(args)
