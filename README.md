@@ -32,7 +32,7 @@ Finally intall requirements using the requirements.txt file in this repository:
 
 `pip install -r requirements.txt`
 
-## using conda
+## Using conda
 
 We recommend installing [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for this, but you can also [Install Anaconda](https://www.anaconda.com/products/individual/get-started) if needed, then create a virtual environment using the environment.yml file in this repository:
 
@@ -55,7 +55,7 @@ This is a keras model h5 file which contains both the architecture and the weigh
 
 Put files in the same directory as "example.py".
 
-# Step 5:
+# Step 4:
 
 To run the example file with the webcam (id for default webcam is usually 0):
 
