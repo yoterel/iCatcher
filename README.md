@@ -7,7 +7,7 @@ Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos
 
 `git clone https://github.com/yoterel/iCatcher.git`
 
-# Step 2: Navigate to the Baby-Eye-Tracker directory, then create a virtual environment.
+# Step 2: Navigate to the iCatcher directory, then create a virtual environment.
 
 ## Using virtual env:
 
