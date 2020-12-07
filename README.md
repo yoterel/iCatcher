@@ -5,7 +5,7 @@ Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos
 
 # Step 1: Clone this repository to get a copy of the code to run locally.
 
-`git clone https://github.com/yoterel/Baby-Eye-Tracker`
+`git clone https://github.com/yoterel/iCatcher.git`
 
 # Step 2: Navigate to the Baby-Eye-Tracker directory, then create a virtual environment.
 
@@ -34,7 +34,7 @@ Finally intall requirements using the requirements.txt file in this repository:
 
 ## Using conda
 
-We recommend installing [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for this, but you can also [Install Anaconda](https://www.anaconda.com/products/individual/get-started) if needed, then create a virtual environment using the environment.yml file in this repository:
+We recommend installing [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for this, but you can also [Install Anaconda](https://www.anaconda.com/products/individual/get-started) if needed, then create an environment using the environment.yml file in this repository:
 
 `conda env create -n env -f environment.yml`
 
