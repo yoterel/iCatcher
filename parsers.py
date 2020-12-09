@@ -1,10 +1,11 @@
 import xml.etree.ElementTree as ET
 import logging
+from pathlib import Path
 
 
 class BaseParser:
     def __init__(self):
-        self.classes = {'away': 0, 'left': 1, 'right': 2, 'off': 3}
+        self.classes = {'away': 0, 'left': 1, 'right': 2}
 
     def parse(self, file):
         """
@@ -13,26 +14,47 @@ class BaseParser:
         frame number is zero indexed
         valid_flag is 1 if this frame has valid annotation, and 0 otherwise
         class is either away, left, right or off.
+
+        list should only contain frames that have changes in class (compared to previous frame)
+        i.e. if the video is labled ["away","away","away","right","right"]
+        then only frame 0 and frame 3 will appear on the output list.
+
         :param file: the label file to parse.
-        :return:
+        :return: None if failed, else: list of lists as described above
         """
         raise NotImplementedError
 
 
-class XmlParser(BaseParser):
-    def __init__(self, ext, labels_folder):
-        super.__init__()
-        self.ext = ext
-        self.labels_folder = labels_folder
+class TrivialParser(BaseParser):
+    """
+    A trivial parser that labels all video as "left" if input "file" is not None
+    """
+    def __init__(self):
+        super().__init__()
 
     def parse(self, file):
-        query = self.labels_folder.glob(file + self.ext)
-        try:
-            next_item = next(query)
-        except StopIteration:
-            logging.info("The file: " + str(file) + " was skipped, since no matching xml was found.")
-            return -1
-        return self.xml_parse(next_item, 30, True)
+        if file:
+            return [[0, 1, "left"]]
+        else:
+            return None
+
+
+class XmlParser(BaseParser):
+    """
+    A parser that can parse vcx files that are used in princeton laboratories
+    """
+    def __init__(self, ext, labels_folder):
+        super().__init__()
+        self.ext = ext
+        self.labels_folder = Path(labels_folder)
+
+    def parse(self, file):
+        label_path = Path(self.labels_folder, file + self.ext)
+        if not label_path.is_file():
+            logging.warning("For the file: " + str(file) + " no matching xml was found.")
+            return None
+        else:
+            return self.xml_parse(label_path, 30, True)
 
     def xml_parse(self, input_file, fps, encode=False):
         tree = ET.parse(input_file)

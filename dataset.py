@@ -69,9 +69,10 @@ def check_terminate(sample, vid_sample, total_sample_number, sample_thresh_per_v
     if sample >= total_sample_number:
         logging.info("sample>=total_sample_number")
         return True
-    if vid_sample >= sample_thresh_per_video:
-        logging.info("reached vid threshold.")
-        return True
+    if sample_thresh_per_video:
+        if vid_sample >= sample_thresh_per_video:
+            logging.info("reached vid threshold.")
+            return True
     return False
 
 
@@ -139,27 +140,26 @@ def create_custom_dataset(db_folder,
                           disjoint_validation_videos=True,
                           holdout_is_experiment=True,
                           holdout_exp_name="Canine2",
+                          sample_thresh_per_video=None,
                           filter_file=None):
     """
     creates a custom dataset from a full dataset
     :param db_folder: the full dataset folder (structure of folder must be /db_folder/class/vidname_framenumber.png)
     :param output_folder: the output folder
-    :param consecutive_frames: whether the frames in the new dataset be consecutive (if not, skips every 1 frame)
-    :param is_single_frame: whether the dataset a single frame per data-point or multi frame per data-point
+    :param consecutive_frames: whether the frames in the new dataset will be consecutive (if not, skips every 1 frame)
+    :param is_single_frame: whether the dataset is a single frame per data-point or multi frame per data-point
     :param diversify: use only "interesting" points for dataset (i.e. classes are diverse within a data-point)
     :param frames_per_data_point: how many frames per data point. must be odd number.
     :param total_sample_number: total number of data-points in the new dataset
     :param disjoint_validation_videos: whether validation set is taken from a disjoint set of videos or not
     :param holdout_is_experiment: whether holdout set is an entire experiment (i.e. a set of videos with same prefix)
     :param holdout_exp_name: the name of the prefix of videos to use as holdout (test) set
+    :param sample_thresh_per_video: if set, maximum amount of frames to take per video
     :param filter_file: if present, uses only images from video names mentioned in this list
     :return: -
     """
-    sample_thresh_per_video = total_sample_number // 10  # these many images per video
-    # exclude_videos = ["ReMix_008a", "ReMix_008b", "ReMix_011a", "ReMix_011b",
-    #                   "ReMix_012a", "ReMix_012b", "ReMix_013a", "ReMix_013b",
-    #                   "ReMix_014a", "ReMix_014b", "ReMix_024a", "ReMix_024b",
-    #                   "ReMix_025a", "ReMix_025b", "Mix_016a"]
+    db_folder = Path(db_folder)
+    output_folder = Path(output_folder)
     exclude_videos = []
     train_folder, validation_folder, holdout_folder = create_train_val_test_folders(output_folder)
     output_stats_file = Path.joinpath(output_folder, "db_stats.txt")
@@ -188,10 +188,10 @@ def create_custom_dataset(db_folder,
         else:
             holdout_vid = False
         fields = file_data.split(",")
-        logging.info("file:", fields[0])
-        logging.info("file counter:", file_counter)
-        logging.info("no_holdout_counter:", no_holdout_file_counter)
-        logging.info("sample:", sample)
+        logging.info("file: {}".format(fields[0]))
+        logging.info("file counter: {}".format(file_counter))
+        logging.info("no_holdout_counter: {}".format(no_holdout_file_counter))
+        logging.info("sample: {}".format(sample))
         query = '**/{}*.png'.format(fields[0])
         images = []
         for image in db_folder.glob(query):
@@ -224,8 +224,8 @@ def create_custom_dataset(db_folder,
                     sample += 1
                     if check_terminate(sample, vid_sample, total_sample_number, sample_thresh_per_video):
                         break
-        usable_frames = int(fields[1]) - int(fields[2]) - int(fields[3]) - int(fields[4])
-        logging.info("used: ", sample - old_sample, "out of: ", usable_frames, "in: ", fields[0])
+        usable_frames = int(fields[1]) - int(fields[2]) - int(fields[3])
+        logging.info("used: {} out of {} in: {}".format(sample - old_sample,usable_frames, fields[0]))
         f.write(file_data + "," + str(sample - old_sample) + "\n")
         f.flush()
         if not holdout_vid:
@@ -234,18 +234,30 @@ def create_custom_dataset(db_folder,
     f.close()
 
 
-def create_dataset_from_videos():
+def create_dataset_from_videos(raw_video_folder,
+                               output_folder,
+                               raw_labels=None,
+                               face_model_file=Path("models", "face_model.caffemodel"),
+                               config_file=Path("models", "config.prototxt"),
+                               ):
     """
     Given a folder of video files and a label parser, outputs a folder with 3 sub folders: away, left, right
     places in them all frames belonging to that class from the videos.
-    :return:
+    NOTE: this is not the final input to iCatcher! use "create_custom_dataset" with default values for the final input.
+
+    frames names are important, we use "videoname_framenumber.png"
+    this is used to get 5-tuples of consecutive frames in "create_custom_dataset"
+
+    :param raw_video_folder: the path to the videos folder
+    :param output_folder: the path to output the dataset
+    :param raw_labels: the path to the labels folder or labels in any format (np, pandas, etc)
+    :param face_model_file: the face extractor model file
+    :param config_file: the face extractor model config file
+    :return: -
     """
-    raw_video_folder = Path("/raw_videos")
-    raw_label_folder = Path("/raw_labels")
-    output_folder = Path("/output_folder")
-    database_file = Path("cache", "db_stats.txt")
-    face_model_file = Path("models", "face_model.caffemodel")
-    config_file = Path("models", "config.prototxt")
+    raw_video_folder = Path(raw_video_folder)
+    output_folder = Path(output_folder)
+    database_file = Path(output_folder, "db_stats.txt")
     right_folder = Path.joinpath(output_folder, "right")
     left_folder = Path.joinpath(output_folder, "left")
     away_folder = Path.joinpath(output_folder, "away")
@@ -265,14 +277,12 @@ def create_dataset_from_videos():
     for video_file in video_files:
         f = open(database_file, "r")
         if video_file.stem in f.read():
-            logging.info("Skipping:", video_file.stem + " since it has already been processed")
+            logging.info("Skipping: {} since it has already been processed".format(video_file.stem))
             f.close()
             continue
-        logging.info("proccessing:", video_file)
-        parser = parsers.XmlParser("*.vcx", raw_label_folder)
+        logging.info("proccessing: {}".format(str(video_file)))
+        parser = parsers.XmlParser(".vcx", raw_labels)
         responses = parser.parse(video_file.stem)
-        if responses == -1:
-            continue
         frame_counter = 0
         no_face_counter = 0
         no_annotation_counter = 0
@@ -281,9 +291,10 @@ def create_dataset_from_videos():
         while ret_val:
             if responses:
                 if frame_counter >= responses[0][0]:  # skip until reaching first annotated frame
+                    # find closest (previous) response this frame belongs to
                     q = [index for index, val in enumerate(responses) if frame_counter >= val[0]]
                     response_index = max(q)
-                    if responses[response_index][1] != 0:
+                    if responses[response_index][1] != 0:  # make sure response is valid
                         bbox = predict.detect_face_opencv_dnn(net, frame, 0.7)
                         if not bbox:
                             no_face_counter += 1
@@ -297,19 +308,18 @@ def create_dataset_from_videos():
                             cv2.imwrite(str(full_path_to_save), crop_img)
                     else:
                         no_annotation_counter += 1
-                        logging.info("Skipping since trial is off")
+                        logging.info("Skipping since frame is invalid")
                 else:
                     no_annotation_counter += 1
-                    logging.info("Skipping since no annotation yet")
+                    logging.info("Skipping since no annotation (yet)")
             else:
                 no_annotation_counter += 1
-                logging.info("Skipping since no annotation")
+                logging.info("Skipping frame since parser reported no annotation")
             ret_val, frame = cap.read()
             frame_counter += 1
-            logging.info("Processing frame: ", frame_counter)
+            logging.info("Processing frame: {}".format(frame_counter))
         f = open(database_file, "a+")
         my_string = '{},{:05d},{:05d},{:05d}\n'.format(str(video_file.stem), frame_counter, no_face_counter,
                                                        no_annotation_counter)
         f.write(my_string)
         f.close()
-
