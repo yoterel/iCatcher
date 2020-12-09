@@ -1,5 +1,4 @@
 import models
-from tensorflow.python.keras.callbacks import TensorBoard
 from pathlib import Path
 import numpy as np
 import data_generators
@@ -15,7 +14,7 @@ def train(args):
     :param args: cmd line arguments
     :return: -
     """
-    pretrained_model = args.pretrained_model
+    pretrained_model = args.pretrained_model_path
     image_size = args.image_size
     batch_size = args.batch_size
     learning_rate = args.lr
@@ -91,12 +90,12 @@ def train(args):
         f = open(dataset_mean_and_std_file_path, 'rb')
         my_mean, my_std = pickle.load(f)
         f.close()
-    logging.info("normalizing with mean:", my_mean)
-    logging.info("normalizing with std:", my_std)
+    logging.info("normalizing with mean: {}".format(my_mean))
+    logging.info("normalizing with std: {}".format(my_std))
     train_datagen.mean = valid_datagen.mean = my_mean
     train_datagen.std = valid_datagen.std = my_std
     if pretrained_model:
-        model = models.fine_tune_baseline_model(args.pretrained_model, learning_rate)
+        model = models.fine_tune_baseline_model(pretrained_model, learning_rate)
     else:
         model = models.build_baseline_model_5image(learning_rate)
 
@@ -120,23 +119,27 @@ def train(args):
                                                      min_delta=0.001,
                                                      cooldown=0,
                                                      min_lr=1e-7)
-    tensor_board = TensorBoard(log_dir=args.tensorboard,
-                               write_graph=True,
-                               write_images=True)
+    callbacks = [early_stop, checkpoint, reduce_lr]
+    if args.tensorboard:
+        from tensorflow.python.keras.callbacks import TensorBoard
+        tensor_board = TensorBoard(log_dir=args.tensorboard,
+                                   write_graph=True,
+                                   write_images=True)
+        callbacks.append(tensor_board)
 
     steps_per_epoch = np.math.ceil(train_five_datagen.samples / batch_size)
     validation_steps = np.math.ceil(valid_five_datagen.samples / batch_size)
 
 # start training
-    H = model.fit_generator(train_generator,
-                            shuffle=True,
-                            steps_per_epoch=steps_per_epoch,
-                            epochs=epochs,
-                            validation_data=valid_generator,
-                            validation_steps=validation_steps,
-                            class_weight=class_weights,
-                            verbose=verbosity,
-                            callbacks=[early_stop, checkpoint, reduce_lr, tensor_board])
+    H = model.fit(train_generator,
+                  shuffle=True,
+                  steps_per_epoch=steps_per_epoch,
+                  epochs=epochs,
+                  validation_data=valid_generator,
+                  validation_steps=validation_steps,
+                  class_weight=class_weights,
+                  verbose=verbosity,
+                  callbacks=callbacks)
 
 
 def parse_arguments():
@@ -176,7 +179,7 @@ def parse_arguments():
 def configure_environment(gpu_id):
     import os
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id  # set gpu visibility prior to importing tf and keras
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)  # set gpu visibility prior to importing tf and keras
     global tf
     import tensorflow as tf
     gpus = tf.config.experimental.list_physical_devices('GPU')
