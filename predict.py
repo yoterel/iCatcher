@@ -39,19 +39,19 @@ def predict_from_video(opt):
     frame_count = 0
     last_class_text = ""  # Initialize so that we see the first class assignment as an event to record
     dataset_mean = opt.per_channel_mean if opt.per_channel_mean else [0.41304266, 0.34594961, 0.27693587]
-    logging.info("using the following values for per-channel mean:", dataset_mean)
+    logging.info("using the following values for per-channel mean: {}".format(dataset_mean))
     dataset_std = opt.per_channel_std if opt.per_channel_std else [0.28606387, 0.2466201, 0.20393684]
-    logging.info("using the following values for per-channel std:", dataset_mean)
+    logging.info("using the following values for per-channel std: {}".format(dataset_mean))
     # load deep models
     face_model = cv2.dnn.readNetFromCaffe(str(config_file), str(face_model_file))
     primary_model = tf.keras.models.load_model(str(path_to_primary_model))
     # set video source
     if opt.source_type == 'file':
         video_file = Path(opt.source)
-        logging.info("predicting on file:", video_file)
+        logging.info("predicting on file: {}".format(video_file))
         cap = cv2.VideoCapture(str(video_file))
     else:
-        logging.info("predicting on webcam:", opt.source)
+        logging.info("predicting on webcam: {}".format(opt.source))
         cap = cv2.VideoCapture(int(opt.source))
     # Get some basic info about the video
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
