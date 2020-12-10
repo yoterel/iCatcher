@@ -83,7 +83,9 @@ Feel free to contribute code.
 # Training:
 
 If you want to retrain the model from scratch / finetune it, use train.py.
-Note: this script expects a dataset orginized in a particular way. To creat such dataset follow these steps:
+
+**Note**: this script expects a dataset orginized in a particular way. To create such dataset follow these steps:
+
 - Gather raw video files into some folder
 - Gather label files into some other folder (these can be in any format you choose, but a parser is required - see below)
 - Use "create_dataset_from_videos" in [dataset.py](dataset.py) script to automatically extract faces from each frame into a output folder (with subfolders away, left and right). Notice this requires creating your own parser - see [parsers.py](parsers.py) for examples.
