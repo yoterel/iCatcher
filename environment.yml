@@ -1,5 +1,6 @@
 name: test
 channels:
+  - anaconda
   - conda-forge
   - defaults
 dependencies:
@@ -15,10 +16,10 @@ dependencies:
   - brotlipy=0.7.0=py37h27cfd23_1003
   - bzip2=1.0.8=h516909a_3
   - c-ares=1.16.1=h7b6447c_0
-  - ca-certificates=2020.11.8=ha878542_0
+  - ca-certificates=2020.10.14=0
   - cachetools=4.1.1=py_0
   - cairo=1.16.0=hcf35c78_1003
-  - certifi=2020.11.8=py37h89c1867_0
+  - certifi=2020.6.20=py37_0
   - cffi=1.14.0=py37h2e261b9_0
   - chardet=3.0.4=py37h06a4308_1003
   - click=7.1.2=py_0
@@ -51,6 +52,7 @@ dependencies:
   - jpeg=9d=h36c2ea0_0
   - keras-preprocessing=1.1.0=py_1
   - lame=3.100=h14c3975_1001
+  - lcms2=2.11=h396b838_0
   - ld_impl_linux-64=2.33.1=h53a641e_7
   - libblas=3.8.0=20_mkl
   - libcblas=3.8.0=20_mkl
@@ -88,11 +90,13 @@ dependencies:
   - numpy=1.19.2=py37h54aff64_0
   - numpy-base=1.19.2=py37hfa32c7d_0
   - oauthlib=3.1.0=py_0
+  - olefile=0.46=py37_0
   - opencv=4.5.0=py37_3
   - openh264=2.1.1=h8b12597_0
-  - openssl=1.1.1h=h516909a_0
+  - openssl=1.1.1h=h7b6447c_0
   - opt_einsum=3.1.0=py_0
   - pcre=8.44=he1b5a44_0
+  - pillow=8.0.0=py37h9a89aac_0
   - pip=20.2.4=py37h06a4308_0
   - pixman=0.38.0=h516909a_1003
   - protobuf=3.13.0.1=py37he6710b0_1
@@ -143,5 +147,4 @@ dependencies:
   - zipp=3.4.0=pyhd3eb1b0_0
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.4.5=h6597ccf_2
-prefix: /home/yotam/anaconda3/envs/test
 
