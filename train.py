@@ -1,3 +1,4 @@
+import utils
 import models
 from pathlib import Path
 import numpy as np
@@ -6,6 +7,7 @@ import sys
 import pickle
 import logging
 import argparse
+import tensorflow as tf
 
 
 def train(args):
@@ -176,25 +178,6 @@ def parse_arguments():
     return args
 
 
-def configure_environment(gpu_id):
-    import os
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)  # set gpu visibility prior to importing tf and keras
-    global tf
-    import tensorflow as tf
-    gpus = tf.config.experimental.list_physical_devices('GPU')
-    if gpus:
-        try:
-            # Currently, memory growth needs to be the same across GPUs
-            for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-            logging.info("Physical GPUs: {}, Logical GPUs: {}".format(len(gpus), len(logical_gpus)))
-        except RuntimeError as e:
-            # Memory growth must be set before GPUs have been initialized
-            logging.info(e)
-
-
 if __name__ == "__main__":
     args = parse_arguments()
     if args.log:
@@ -202,6 +185,6 @@ if __name__ == "__main__":
         logging.basicConfig(filename=args.log, filemode='w', level=args.verbosity.upper())
     else:
         logging.basicConfig(level=args.verbosity.upper())
-    configure_environment(args.gpu_id)
+    utils.configure_environment(args.gpu_id)
     train(args)
     logging.info("Done!")

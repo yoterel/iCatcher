@@ -1,23 +1,15 @@
+import utils
 import argparse
 from pathlib import Path
 import predict
 import logging
 
 
-def configure_environment(gpu_id):
-    import os
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id  # set gpu visibility prior to importing tf
-    global tf
-    import tensorflow as tf
-
-
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Baby Eye Tracker')
-    parser.add_argument('--gpu_id', type=str, default='-1', help='GPU id to use, use -1 for CPU.')
+    parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id).')
     parser.add_argument('--source_type', type=str, default='file', choices=['file', 'webcam'],
                         help='selects source of stream to use.')
-    parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id).')
     parser.add_argument('--output_annotation', type=str, help='filename for text output')
     # Set up text output file, using https://osf.io/3n97m/ - PrefLookTimestamp coding standard
     parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp"])
@@ -26,6 +18,7 @@ def parse_arguments():
                         type=float, help='supply custom per-channel mean of data for normalization')
     parser.add_argument('--per_channel_std', nargs=3, metavar=('Channel1_std', 'Channel2_std', 'Channel3_std'),
                         type=float, help='supply custom per-channel std of data for normalization')
+    parser.add_argument('--gpu_id', type=str, default='-1', help='GPU id to use, use -1 for CPU.')
     parser.add_argument("--log",
                         help="If present, writes training log to this path")
     parser.add_argument("-v", "--verbosity", type=str, choices=["debug", "info", "warning"], default="info",
@@ -47,5 +40,5 @@ if __name__ == '__main__':
         logging.basicConfig(filename=args.log, filemode='w', level=args.verbosity.upper())
     else:
         logging.basicConfig(level=args.verbosity.upper())
-    configure_environment(args.gpu_id)
+    utils.configure_environment(args.gpu_id)
     predict.predict_from_video(args)
