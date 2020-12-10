@@ -79,3 +79,15 @@ output of the automated coding. Other formats will be added in the future.
 An example video file can be found [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/example.mp4).
 
 Feel free to contribute code.
+
+# Trainning:
+
+If you want to retrain the model from scratch / finetune it, use train.py.
+Note: this script expects a dataset orginized in a particular way. To creat such dataset follow these steps:
+- Gather raw video files into some folder
+- Gather label files into some other folder (these can be in any format you choose, but a parser is required - see below)
+- Use "create_dataset_from_videos" in [dataset.py](dataset.py) script to automatically extract faces from each frame into a output folder (with subfolders away, left and right). Notice this requires creating your own parser - see [parsers.py](parsers.py) for examples.
+- Use "create_custom_dataset" in [dataset.py](dataset.py) script to further process the dataset into the final form (we recommend using default values unless architectural changes are made to the network). The final dataset structure will be a folder containing the subfolders {train, validation, holdout} each with their own subfolders {away, left, right}, consisting of 5-tuples of non-consecutive frames from the original videos in the appropriate class.
+- Finally, use [train.py](train.py) to train the network.
+
+For more detailed information, see function documentation in code.
