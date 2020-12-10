@@ -80,7 +80,7 @@ An example video file can be found [here](https://www.cs.tau.ac.il/~yotamerel/ba
 
 Feel free to contribute code.
 
-# Trainning:
+# Training:
 
 If you want to retrain the model from scratch / finetune it, use train.py.
 Note: this script expects a dataset orginized in a particular way. To creat such dataset follow these steps:
