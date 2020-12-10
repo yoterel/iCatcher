@@ -82,7 +82,7 @@ Feel free to contribute code.
 
 # Training:
 
-If you want to retrain the model from scratch / finetune it, use train.py.
+If you want to retrain the model from scratch / finetune it, use [train.py](train.py).
 
 **Note**: this script expects a dataset orginized in a particular way. To create such dataset follow these steps:
 
