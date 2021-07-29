@@ -14,6 +14,7 @@ def parse_arguments():
     # Set up text output file, using https://osf.io/3n97m/ - PrefLookTimestamp coding standard
     parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp"])
     parser.add_argument('--output_video_path', help='if present, annotated video will be saved to this path')
+    parser.add_argument('--show_output', action='store_true', help='show results online in a separate window')
     parser.add_argument('--per_channel_mean', nargs=3, metavar=('Channel1_mean', 'Channel2_mean', 'Channel3_mean'),
                         type=float, help='supply custom per-channel mean of data for normalization')
     parser.add_argument('--per_channel_std', nargs=3, metavar=('Channel1_std', 'Channel2_std', 'Channel3_std'),

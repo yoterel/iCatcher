@@ -5,7 +5,6 @@ import numpy as np
 import draw
 import logging
 
-
 def detect_face_opencv_dnn(net, frame, conf_threshold):
     frameHeight = frame.shape[0]
     frameWidth = frame.shape[1]
@@ -68,7 +67,6 @@ def predict_from_video(opt):
             # Write header
             output_file.write(
                 "Tracks: left, right, away, codingactive, outofframe\nTime,Duration,TrackName,comment\n\n")
-
     # iterate over frames
     ret_val, frame = cap.read()
     while ret_val:
@@ -103,6 +101,15 @@ def predict_from_video(opt):
             popped_frame = frames.pop(0)
             class_text = reverse_dict[answers[-sequence_length]]
             # If save_annotated_video is true, add text label, bounding box for face, and arrow showing direction
+            if opt.show_output:
+                popped_frame = draw.put_text(popped_frame, class_text)
+                if bbox:
+                    popped_frame = draw.put_rectangle(popped_frame, face)
+                    if not class_text == "away":
+                        popped_frame = draw.put_arrow(popped_frame, class_text, face)
+                cv2.imshow('frame', popped_frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
             if opt.output_video_path:
                 popped_frame = draw.put_text(popped_frame, class_text)
                 if bbox:
@@ -120,7 +127,8 @@ def predict_from_video(opt):
             logging.info("frame: {}, class: {}".format(str(frame_count - sequence_length + 1), class_text))
         ret_val, frame = cap.read()
         frame_count += 1
-
+    if opt.show_output:
+        cv2.destroyAllWindows()
     if opt.output_video_path:
         video_output.release()
     if opt.output_annotation:  # write footer to file
