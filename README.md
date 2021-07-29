@@ -9,6 +9,16 @@ Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos
 
 # Step 2: Navigate to the iCatcher directory, then create a virtual environment.
 
+## Using conda
+
+We recommend installing [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for this, but you can also [Install Anaconda](https://www.anaconda.com/products/individual/get-started) if needed, then create an environment using the environment.yml file in this repository:
+
+`conda env create -n env -f environment.yml`
+
+Activate the environment
+
+`conda activate env`
+
 ## Using virtual env:
 
 Create the virtual environment:
@@ -28,19 +38,9 @@ Activate the environment:
 
 `source venv/bin/activate`
 
-Finally intall requirements using the requirements.txt file in this repository:
+Finally install requirements using the requirements.txt file in this repository:
 
 `pip install -r requirements.txt`
-
-## Using conda
-
-We recommend installing [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for this, but you can also [Install Anaconda](https://www.anaconda.com/products/individual/get-started) if needed, then create an environment using the environment.yml file in this repository:
-
-`conda env create -n env -f environment.yml`
-
-Activate the environment
-
-`conda activate env`
 
 # Step 3:
 
