@@ -1,7 +1,11 @@
 channels:
-  - conda-forge
+  - pytorch
   - defaults
 dependencies:
-  - opencv=4.5.2
-  - tensorflow
-  - python=3.8.10
+  - tensorflow-gpu
+  - pytorch
+  - torchvision
+  - python=3.8
+  - pip
+  - pip:
+    - opencv-python
