@@ -93,6 +93,8 @@ def predict_from_video(opt):
         if not bbox:
             answers.append(classes['away'])  # if face detector fails, treat as away and mark invalid
             image = np.zeros((1, resize_window, resize_window, 3), np.float64)
+            my_box = np.array([0, 0, 0, 0, 0])
+            box_sequence.append(my_box)
             image_sequence.append((image, True))
         else:
             # todo: improve face selection mechanism
