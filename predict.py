@@ -39,7 +39,10 @@ def predict_from_video(opt):
         path_to_primary_model = Path("models", "icatcher+.pt")
         import torch
         primary_model = GazeCodingModel(device=opt.gpu_id, n=5, add_box=True).to(opt.gpu_id)
-        primary_model.load_state_dict(torch.load(str(path_to_primary_model)))
+        if opt.gpu_id == 'cpu':
+            primary_model.load_state_dict(torch.load(str(path_to_primary_model), map_location=torch.device('cpu')))
+        else:
+            primary_model.load_state_dict(torch.load(str(path_to_primary_model)))
         primary_model.eval()
         resize_window = 100
     else:
