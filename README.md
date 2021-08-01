@@ -29,9 +29,9 @@ Activate the environment
 
   [iCatcher+](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/icatcher+.pt)
   
-  Note: the improvments were proposed by [these guys](https://github.com/XinchengTan/infant-gaze-coding).
+  **Note1**: the improvments were proposed by [these guys](https://github.com/XinchengTan/infant-gaze-coding).
   
-  Note2: this model does not include the face selection mechanism described by the original authors (yet).
+  **Note2**: this model does not include the face selection mechanism described by the original authors (yet).
 
 
 ## Download the face extraction model files (opencv dnn):
