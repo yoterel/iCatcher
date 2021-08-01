@@ -2,7 +2,6 @@
 A CNN that classifies discrete eye gaze direction ("Left", "Right", "Away") from low-res in-the-wild infant videos (per-frame classification).
 Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos Using Neural Networks" presented in [ICIS 2020](https://infantstudies.org/congress-2020).
 
-
 # Step 1: Clone this repository to get a copy of the code to run locally.
 
 `git clone https://github.com/yoterel/iCatcher.git`
@@ -19,35 +18,23 @@ Activate the environment
 
 `conda activate env`
 
-## Using virtual env:
+# Step 3: Download the latest network model & weights file:
 
-Create the virtual environment:
+## download iCatcher model weights
+- The original iCatcher model (tf model) trained on the Princeton look-while-listening dataset:
 
-`python3 -m venv env` (Linux and Mac) 
+  [iCatcher](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5)
+  
+- A proposed improvement of iCatcher (torch model) trained on the lookit dataset.
 
-`py -m venv env` (Windows)
+  [iCatcher+](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/icatcher+.pt)
+  
+  Note: the improvments were proposed by [these guys](https://github.com/XinchengTan/infant-gaze-coding).
+  
+  Note2: this model does not include the face selection mechanism described by the original authors (yet).
 
-See https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 
-Make sure it is using Python 3.6+ (by default it will use the most recent version available, but you can specify). 
-If you don't have an appropriate version of python installed, you can install it at https://www.python.org/downloads/
-
-You will need to make sure you have 64-bit python installed in order to use tensorflow-gpu (see https://github.com/tensorflow/tensorflow/issues/8251)
-
-Activate the environment:
-
-`source venv/bin/activate`
-
-Finally install requirements using the requirements.txt file in this repository:
-
-`pip install -r requirements.txt`
-
-# Step 3:
-
-- Download the latest network model & weights file [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5).
-This is a keras model h5 file which contains both the architecture and the weights.
-
-- Download the face extraction model files (opencv dnn):
+## Download the face extraction model files (opencv dnn):
 
   [prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
 
