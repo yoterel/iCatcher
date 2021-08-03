@@ -46,17 +46,17 @@ Put files in the [models](models) directory.
 
 To run the example file with the webcam (id for default webcam is usually 0):
 
-`python example.py --source_type webcam my_webcam_id`
+`python example.py --source_type webcam my_webcam_id --show_output`
 
 To run the example file with a video file:
 
-`python example.py --source_type file /path/to/my/video.mp4`
+`python example.py --source_type file /path/to/my/video.mp4 --show_output`
 
 You can save a labeled video by adding:
 
 `--output_video_path /path/to/output_video.mp4`
 
-If you want tooutput annotations to a file, use:
+If you want to output annotations to a file, use:
 
 `--output_annotation /path/to/output_file.csv`
 
