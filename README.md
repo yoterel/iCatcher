@@ -20,7 +20,7 @@ Activate the environment
 
 # Step 3: Download the latest network model & weights file:
 
-## download iCatcher model weights
+## Download iCatcher model weights
 - The original iCatcher model (tf model) trained on the Princeton look-while-listening dataset:
 
   [iCatcher](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5)
@@ -33,14 +33,13 @@ Activate the environment
   
   **Note2**: this model does not include the face selection mechanism described by the original authors (yet).
 
-
 ## Download the face extraction model files (opencv dnn):
 
   [prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
 
   [caffemodel (contains weights)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/face_model.caffemodel)
 
-Put files in the [models](models) directory.
+Put **all** the files from this step in the [models](models) directory.
 
 # Step 4:
 
