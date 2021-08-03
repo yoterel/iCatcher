@@ -61,7 +61,7 @@ If you want to output annotations to a file, use:
 `--output_annotation /path/to/output_file.csv`
 
 By default, this will save a file in the format described [here](https://osf.io/3n97m/) describing the 
-output of the automated coding. Other formats will be added in the future.
+output of the automated coding. Other formats will be added upon request.
 
 An example video file can be found [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/example.mp4).
 
