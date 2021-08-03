@@ -12,8 +12,9 @@ def parse_arguments():
                         help='selects source of stream to use.')
     parser.add_argument('--output_annotation', type=str, help='filename for text output')
     parser.add_argument("-m", "--model", type=str, choices=["icatcher", "icatcher+"], default="icatcher", help="which model will be used for predictions")
+    parser.add_argument("--on_off", action="store_true", help="left/right/away annotations will be swapped with on/off (only works with icatcher+)")
     # Set up text output file, using https://osf.io/3n97m/ - PrefLookTimestamp coding standard
-    parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp"])
+    parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp", "raw_output"])
     parser.add_argument('--output_video_path', help='if present, annotated video will be saved to this path')
     parser.add_argument('--show_output', action='store_true', help='show results online in a separate window')
     parser.add_argument('--per_channel_mean', nargs=3, metavar=('Channel1_mean', 'Channel2_mean', 'Channel3_mean'),
@@ -32,6 +33,13 @@ def parse_arguments():
         args.output_video_path = Path(args.output_video_path)
     if args.log:
         args.log = Path(args.log)
+    if args.on_off:
+        if args.model != "icatcher+":
+            print("On off mode can only be used with icatcher+ model. Pass icatcher+ with the --mode flag.")
+            raise AssertionError
+        if args.output_format != "raw_output":
+            print("On off mode can only be used with raw output format. Pass raw_output with the --output_format flag.")
+            raise AssertionError
     if not args.per_channel_mean:
         if args.model == "icatcher":
             args.per_channel_mean = [0.41304266, 0.34594961, 0.27693587]

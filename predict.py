@@ -24,6 +24,15 @@ def detect_face_opencv_dnn(net, frame, conf_threshold):
     return bboxes
 
 
+def prep_frame(popped_frame, bbox, class_text, face):
+    popped_frame = draw.put_text(popped_frame, class_text)
+    if bbox:
+        popped_frame = draw.put_rectangle(popped_frame, face)
+        if not class_text == "away" and not class_text == "off" and not class_text == "on":
+            popped_frame = draw.put_arrow(popped_frame, class_text, face)
+    return popped_frame
+
+
 def predict_from_video(opt):
     # initialize
     logging.info("using the following values for per-channel mean: {}".format(opt.per_channel_mean))
@@ -145,30 +154,28 @@ def predict_from_video(opt):
             image_sequence.pop(0)
             box_sequence.pop(0)
             class_text = reverse_dict[answers[-sequence_length]]
-            # If save_annotated_video is true, add text label, bounding box for face, and arrow showing direction
+            if opt.on_off:
+                class_text = "off" if class_text == "away" else "on"
+            # If show_output or output_video is true, add text label, bounding box for face, and arrow showing direction
             if opt.show_output:
-                popped_frame = draw.put_text(popped_frame, class_text)
-                if bbox:
-                    popped_frame = draw.put_rectangle(popped_frame, face)
-                    if not class_text == "away":
-                        popped_frame = draw.put_arrow(popped_frame, class_text, face)
-                cv2.imshow('frame', popped_frame)
+                prepped_frame = prep_frame(popped_frame, bbox, class_text, face)
+                cv2.imshow('frame', prepped_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             if opt.output_video_path:
-                popped_frame = draw.put_text(popped_frame, class_text)
-                if bbox:
-                    popped_frame = draw.put_rectangle(popped_frame, face)
-                    if not class_text == "away":
-                        popped_frame = draw.put_arrow(popped_frame, class_text, face)
-                video_output.write(popped_frame)
-                # Record "event" for change of direction if code has changed
+                prepped_frame = prep_frame(popped_frame, bbox, class_text, face)
+                video_output.write(prepped_frame)
+
             if opt.output_annotation:
-                if opt.output_format == "PrefLookTimestamp":
-                    if class_text != last_class_text:
+                if opt.output_format == "raw_output":
+                    output_file.write("{}, {}\n".format(frame_count, class_text))
+                elif opt.output_format == "PrefLookTimestamp":
+                    if class_text != last_class_text: # Record "event" for change of direction if code has changed
                         frame_ms = int(1000. / framerate * frame_count)
                         output_file.write("{},0,{}\n".format(frame_ms, class_text))
                         last_class_text = class_text
+                else:
+                    raise NotImplementedError
             logging.info("frame: {}, class: {}".format(str(frame_count - sequence_length + 1), class_text))
         ret_val, frame = cap.read()
         frame_count += 1
@@ -182,3 +189,5 @@ def predict_from_video(opt):
             output_file.write("0,{},codingactive\n".format(frame_ms))
             output_file.close()
     cap.release()
+
+
