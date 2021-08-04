@@ -2,10 +2,10 @@ channels:
   - pytorch
   - defaults
 dependencies:
-  - tensorflow-gpu
   - pytorch
   - torchvision
   - python=3.8
   - pip
   - pip:
+    - tensorflow
     - opencv-python
