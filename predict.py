@@ -105,6 +105,7 @@ def predict_from_video(opt):
             my_box = np.array([0, 0, 0, 0, 0])
             box_sequence.append(my_box)
             image_sequence.append((image, True))
+            face = None
         else:
             # todo: improve face selection mechanism
             face = min(bbox, key=lambda x: x[3] - x[1])  # select lowest face in image, probably belongs to kid
