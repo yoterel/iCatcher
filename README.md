@@ -20,26 +20,22 @@ Activate the environment
 
 # Step 3: Download the latest network model & weights file:
 
-## Download iCatcher model weights
-- The original iCatcher model (tf model) trained on the Princeton look-while-listening dataset:
+Download all required model & weight files [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model_files.zip).
 
-  [iCatcher](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/model.h5)
+Extract the files from this step to the [models](models) directory (the models directory needs to directly contain the extracted files).
+
+This zip contains:
+
+- The original iCatcher model (tf model) trained on the Princeton look-while-listening dataset (model.h5).
   
-- A proposed improvement of iCatcher (torch model) trained on the lookit dataset.
-
-  [iCatcher+](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/icatcher+.pt)
+- A proposed improvement of iCatcher (torch model) trained on the lookit dataset (icatcher+.pt).
   
   **Note1**: the improvments were proposed by [these guys](https://github.com/XinchengTan/infant-gaze-coding).
   
   **Note2**: this model does not include the face selection mechanism described by the original authors (yet).
 
-## Download the face extraction model files (opencv dnn):
+- Face extraction model files from opencv-dnn (config.prototxt & face_model.caffemodel)
 
-  [prototxt (contains architecture)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/config.prototxt)
-
-  [caffemodel (contains weights)](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/face_model.caffemodel)
-
-Put **all** the files from this step in the [models](models) directory.
 
 # Step 4:
 
@@ -64,7 +60,10 @@ output of the automated coding. Other formats will be added upon request.
 
 An example video file can be found [here](https://www.cs.tau.ac.il/~yotamerel/baby_eye_tracker/example.mp4).
 
-Feel free to contribute code.
+For all command line options, use:
+
+`python example.py --help`
+
 
 # Training:
 
@@ -79,3 +78,7 @@ If you want to retrain the model from scratch / finetune it, use [train.py](trai
 - Finally, use [train.py](train.py) to train the network.
 
 For more detailed information, see function documentation in code.
+
+# Contributions
+
+Feel free to contribute code by submitting a pull request.
