@@ -10,12 +10,15 @@ def parse_arguments():
     parser.add_argument('source', type=str, help='the source to use (path to video file or webcam id).')
     parser.add_argument('--source_type', type=str, default='file', choices=['file', 'webcam'],
                         help='selects source of stream to use.')
-    parser.add_argument('--output_annotation', type=str, help='filename for text output')
-    parser.add_argument("-m", "--model", type=str, choices=["icatcher", "icatcher+"], default="icatcher", help="which model will be used for predictions")
-    parser.add_argument("--on_off", action="store_true", help="left/right/away annotations will be swapped with on/off (only works with icatcher+)")
+    parser.add_argument('--output_annotation', type=str, help='folder to output annotations to')
+    parser.add_argument("-m", "--model", type=str, choices=["icatcher", "icatcher+"], default="icatcher",
+                        help="which model will be used for predictions")
+    parser.add_argument("--on_off", action="store_true",
+                        help="left/right/away annotations will be swapped with on/off (only works with icatcher+)")
     # Set up text output file, using https://osf.io/3n97m/ - PrefLookTimestamp coding standard
-    parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp", "raw_output"])
-    parser.add_argument('--output_video_path', help='if present, annotated video will be saved to this path')
+    parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp",
+                                                                                           "raw_output"])
+    parser.add_argument('--output_video_path', help='if present, annotated video will be saved to this folder')
     parser.add_argument('--show_output', action='store_true', help='show results online in a separate window')
     parser.add_argument('--per_channel_mean', nargs=3, metavar=('Channel1_mean', 'Channel2_mean', 'Channel3_mean'),
                         type=float, help='supply custom per-channel mean of data for normalization')
@@ -29,8 +32,14 @@ def parse_arguments():
     args = parser.parse_args()
     if args.output_annotation:
         args.output_filepath = Path(args.output_annotation)
+        if not args.output_filepath.is_dir():
+            print("--output_filepath argument must point to a folder.")
+            raise AssertionError
     if args.output_video_path:
         args.output_video_path = Path(args.output_video_path)
+        if not args.output_video_path.is_dir():
+            print("--output_video_path argument must point to a folder.")
+            raise AssertionError
     if args.log:
         args.log = Path(args.log)
     if args.on_off:

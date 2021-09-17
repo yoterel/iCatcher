@@ -39,21 +39,21 @@ This zip contains:
 
 # Step 4:
 
-To run the example file with the webcam (id for default webcam is usually 0):
+To run icatcher with the webcam (id for default webcam is usually 0):
 
-`python example.py --source_type webcam my_webcam_id --show_output`
+`python icatcher.py --source_type webcam my_webcam_id --show_output`
 
-To run the example file with a video file:
+To run icatcher with a video file:
 
-`python example.py --source_type file /path/to/my/video.mp4 --show_output`
+`python icatcher.py --source_type file /path/to/my/video.mp4 --show_output`
 
 You can save a labeled video by adding:
 
-`--output_video_path /path/to/output_video.mp4`
+`--output_video_path /path/to/output_folder`
 
 If you want to output annotations to a file, use:
 
-`--output_annotation /path/to/output_file.csv`
+`--output_annotation /path/to/output_annotation_folder`
 
 By default, this will save a file in the format described [here](https://osf.io/3n97m/) describing the 
 output of the automated coding. Other formats will be added upon request.
@@ -62,7 +62,7 @@ An example video file can be found [here](https://www.cs.tau.ac.il/~yotamerel/ba
 
 For all command line options, use:
 
-`python example.py --help`
+`python icatcher.py --help`
 
 
 # Training:
