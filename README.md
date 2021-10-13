@@ -2,9 +2,9 @@
 A CNN that classifies discrete eye gaze direction ("Left", "Right", "Away") from low-res in-the-wild infant videos (per-frame classification).
 Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos Using Neural Networks" presented in [ICIS 2020](https://infantstudies.org/congress-2020). 
 
-Preprint of icatcher availble [here](https://doi.org/10.31234/osf.io/6ysu9).
+Preprint of icatcher available [here](https://doi.org/10.31234/osf.io/6ysu9).
 
-Preprint of icatcher+, which this repository uses (partially) availble [here](https://doi.org/10.31234/osf.io/s8c4m).
+Preprint of icatcher+, which this repository uses (partially) available [here](https://doi.org/10.31234/osf.io/s8c4m).
 
 # Step 1: Clone this repository to get a copy of the code to run locally.
 
