@@ -1,5 +1,6 @@
 import cv2
 
+
 def put_text(img, class_name):
     font = cv2.FONT_HERSHEY_SIMPLEX
     top_left_corner_text = (10, 30)
@@ -16,9 +17,12 @@ def put_text(img, class_name):
     return img
 
 
-def put_arrow(img, class_name, face):
+def put_arrow(img, class_name, face, flip_arrow=False):
     arrow_start_x = int(face[0] + 0.5 * face[2])
-    arrow_end_x = int(face[0] + 0.1 * face[2] if class_name == "left" else face[0] + 0.9 * face[2])
+    if flip_arrow:
+        arrow_end_x = int(face[0] + 0.1 * face[2] if class_name == "right" else face[0] + 0.9 * face[2])
+    else:
+        arrow_end_x = int(face[0] + 0.1 * face[2] if class_name == "left" else face[0] + 0.9 * face[2])
     arrow_y = int(face[1] + 0.8 * face[3])
     img = cv2.arrowedLine(img,
                           (arrow_start_x, arrow_y),

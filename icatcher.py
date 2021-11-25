@@ -15,6 +15,10 @@ def parse_arguments():
                         help="which model will be used for predictions")
     parser.add_argument("--on_off", action="store_true",
                         help="left/right/away annotations will be swapped with on/off (only works with icatcher+)")
+    parser.add_argument("--fd_confidence", type=float, default=0.7,
+                        help="the confidence threshold for the face detector. higher means better accuracy but it might filter out the infants face.")
+    parser.add_argument("--flip_annotations", action="store_true",
+                        help="flips left and right classes (so they are given in the childs perspective instead of the screens perspective)")
     # Set up text output file, using https://osf.io/3n97m/ - PrefLookTimestamp coding standard
     parser.add_argument('--output_format', type=str, default="PrefLookTimestamp", choices=["PrefLookTimestamp",
                                                                                            "raw_output"])

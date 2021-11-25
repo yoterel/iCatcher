@@ -24,12 +24,12 @@ def detect_face_opencv_dnn(net, frame, conf_threshold):
     return bboxes
 
 
-def prep_frame(popped_frame, bbox, class_text, face):
+def prep_frame(popped_frame, bbox, class_text, face, flip_arrow):
     popped_frame = draw.put_text(popped_frame, class_text)
     if bbox:
         popped_frame = draw.put_rectangle(popped_frame, face)
         if not class_text == "away" and not class_text == "off" and not class_text == "on":
-            popped_frame = draw.put_arrow(popped_frame, class_text, face)
+            popped_frame = draw.put_arrow(popped_frame, class_text, face, flip_arrow)
     return popped_frame
 
 
@@ -56,8 +56,12 @@ def predict_from_video(opt):
         resize_window = 100
     else:
         raise NotImplementedError
-    classes = {'away': 0, 'left': 1, 'right': 2}
-    reverse_dict = {0: 'away', 1: 'left', 2: 'right'}
+    if opt.flip_annotations:
+        classes = {'away': 0, 'left': 2, 'right': 1}
+        reverse_dict = {0: 'away', 2: 'left', 1: 'right'}
+    else:
+        classes = {'away': 0, 'left': 1, 'right': 2}
+        reverse_dict = {0: 'away', 1: 'left', 2: 'right'}
     sequence_length = 9
     loc = -5
     # load face extractor model
@@ -110,7 +114,7 @@ def predict_from_video(opt):
         img_shape = np.array(frame.shape)
         while ret_val:
             frames.append(frame)
-            bbox = detect_face_opencv_dnn(face_model, frame, 0.7)
+            bbox = detect_face_opencv_dnn(face_model, frame, opt.fd_confidence)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # network was trained on RGB images.
             if not bbox:
                 answers.append(classes['away'])  # if face detector fails, treat as away and mark invalid
@@ -167,12 +171,12 @@ def predict_from_video(opt):
                     answers[loc] = int32_pred
                 image_sequence.pop(0)
                 box_sequence.pop(0)
-                class_text = reverse_dict[answers[-sequence_length]]
+                class_text = reverse_dict[answers[loc]]
                 if opt.on_off:
                     class_text = "off" if class_text == "away" else "on"
                 # If show_output or output_video is true, add text label, bounding box for face, and arrow showing direction
                 if opt.show_output:
-                    prepped_frame = prep_frame(popped_frame, bbox, class_text, face)
+                    prepped_frame = prep_frame(popped_frame, bbox, class_text, face, opt.flip_annotations)
                     cv2.imshow('frame', prepped_frame)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
