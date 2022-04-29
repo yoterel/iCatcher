@@ -1,9 +1,13 @@
+### Important notice
+A new version called iCatcher+ was published, see [this](https://github.com/yoterel/icatcher_plus) repository for further details.
+
+
 # iCatcher
 A CNN that classifies discrete eye gaze direction ("Left", "Right", "Away") from low-res in-the-wild infant videos (per-frame classification).
 Based on "Automatic, Real-Time Coding of Looking-While-Listening Children Videos Using Neural Networks" presented in [ICIS 2020](https://infantstudies.org/congress-2020), and in [BUCLD 46](https://www.bu.edu/bucld/).
 
+Original paper availble [here](https://doi.org/10.1111/infa.12468).
 Preprint of icatcher available [here](https://doi.org/10.31234/osf.io/6ysu9).
-
 Preprint of icatcher+, which this repository uses (partially) available [here](https://doi.org/10.31234/osf.io/s8c4m).
 
 # Step 1: Clone this repository to get a copy of the code to run locally.
